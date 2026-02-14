@@ -6,7 +6,7 @@ import { setupReadyEvent, setupMemberJoinEvent, setupErrorEvents } from './event
 import { prompt } from '../cli/prompt';
 
 export async function startBot(config: Config, credentials: Credentials): Promise<void> {
-  const { token, notifyUserId } = credentials;
+  const { token, notificationMethod, notifyId } = credentials;
 
   console.log('');
   console.log('[Bot] Starting Discord Join Monitor...');
@@ -23,6 +23,7 @@ export async function startBot(config: Config, credentials: Credentials): Promis
   }
 
   console.log(`[Config] Exempting ${config.exemptServers.length} server(s)`);
+  console.log(`[Config] Notification method: ${notificationMethod === 'dm' ? 'DM' : 'Channel'}`);
 
   // Setup config watcher
   const configWatcher = new ConfigWatcher(config);
@@ -33,7 +34,7 @@ export async function startBot(config: Config, credentials: Credentials): Promis
 
   // Setup event handlers
   setupReadyEvent(client, configWatcher.getConfig());
-  setupMemberJoinEvent(client, () => configWatcher.getConfig(), notifyUserId);
+  setupMemberJoinEvent(client, () => configWatcher.getConfig(), credentials);
   setupErrorEvents(client);
 
   // Process event handlers

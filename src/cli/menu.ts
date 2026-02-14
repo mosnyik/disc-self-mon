@@ -7,7 +7,7 @@ export async function showMainMenu(): Promise<string> {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('');
   console.log('  1. Start monitoring');
-  console.log('  2. Change monitor account / notification recipient');
+  console.log('  2. Reconfigure (token, notification method)');
   console.log('  3. Configure raid detection');
   console.log('  4. Configure exempt servers');
   console.log('  5. Exit');

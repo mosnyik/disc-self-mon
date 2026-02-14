@@ -1,4 +1,4 @@
-import { Config, Credentials } from '../types';
+import { Config, Credentials, NotificationMethod } from '../types';
 import { saveConfig, saveCredentials } from '../config';
 import { prompt } from './prompt';
 import { printHeader, printBox } from './menu';
@@ -8,7 +8,7 @@ export async function setupCredentials(): Promise<Credentials> {
   printHeader('DISCORD JOIN MONITOR - SETUP');
 
   console.log('This bot monitors Discord servers for new member joins');
-  console.log('and sends DM notifications.');
+  console.log('and sends notifications.');
   console.log('');
 
   // Step 1: Monitor Account Token
@@ -34,36 +34,95 @@ export async function setupCredentials(): Promise<Credentials> {
     process.exit(1);
   }
 
-  // Step 2: Notification Recipient
+  // Step 2: Notification Method
   console.log('');
-  printBox('STEP 2: NOTIFICATION RECIPIENT');
+  printBox('STEP 2: NOTIFICATION METHOD');
 
-  console.log('This is the Discord account that will:');
-  console.log('  • Receive DM notifications');
-  console.log('  • Get alerts when members join');
-  console.log('  • Get raid detection warnings');
+  console.log('How do you want to receive notifications?');
   console.log('');
-  console.log('This can be the SAME account as above, or DIFFERENT.');
-  console.log('If different, both accounts must share a server or have DMs open.');
+  console.log('  1. DM (Direct Message to another account)');
+  console.log('  2. Channel (Post to a Discord channel)');
   console.log('');
-  console.log('How to get User ID:');
-  console.log('  1. Enable Developer Mode (Discord Settings > Advanced)');
-  console.log('  2. Right-click username > Copy User ID');
+  console.log('┌─────────────────────────────────────────────────────────┐');
+  console.log('│  ⚠ IMPORTANT: If you choose DM, the recipient must be  │');
+  console.log('│  a DIFFERENT account than the monitor account above.   │');
+  console.log('│  You cannot DM yourself! Use Channel mode instead.     │');
+  console.log('└─────────────────────────────────────────────────────────┘');
   console.log('');
 
-  const notifyUserId = await prompt('Enter NOTIFICATION RECIPIENT User ID: ');
-  if (!notifyUserId) {
-    console.error('[Error] Notification recipient ID is required');
-    process.exit(1);
+  let notificationMethod: NotificationMethod;
+  while (true) {
+    const methodChoice = await prompt('Select notification method [1 or 2]: ');
+    if (methodChoice === '1' || methodChoice === '') {
+      notificationMethod = 'dm';
+      break;
+    } else if (methodChoice === '2') {
+      notificationMethod = 'channel';
+      break;
+    }
+    console.log('Please enter 1 or 2');
   }
 
-  const credentials = { token, notifyUserId };
-  saveCredentials(credentials);
-
+  // Step 3: Notification Target
   console.log('');
-  console.log('[Setup] Settings saved to .env');
+  if (notificationMethod === 'dm') {
+    printBox('STEP 3: DM RECIPIENT');
 
-  return credentials;
+    console.log('This is the Discord account that will receive DMs.');
+    console.log('');
+    console.log('⚠ MUST be a DIFFERENT account than the monitor account!');
+    console.log('  (Discord does not allow sending DMs to yourself)');
+    console.log('');
+    console.log('Both accounts must share a server or have DMs open.');
+    console.log('');
+    console.log('How to get User ID:');
+    console.log('  1. Enable Developer Mode (Discord Settings > Advanced)');
+    console.log('  2. Right-click username > Copy User ID');
+    console.log('');
+
+    const notifyId = await prompt('Enter RECIPIENT User ID: ');
+    if (!notifyId) {
+      console.error('[Error] User ID is required');
+      process.exit(1);
+    }
+
+    const credentials = { token, notificationMethod, notifyId };
+    saveCredentials(credentials);
+
+    console.log('');
+    console.log('[Setup] Settings saved to .env');
+    console.log('[Setup] Notifications will be sent via DM');
+
+    return credentials;
+
+  } else {
+    printBox('STEP 3: NOTIFICATION CHANNEL');
+
+    console.log('This is the Discord channel where notifications will be posted.');
+    console.log('');
+    console.log('The monitor account must have permission to send messages');
+    console.log('in this channel.');
+    console.log('');
+    console.log('How to get Channel ID:');
+    console.log('  1. Enable Developer Mode (Discord Settings > Advanced)');
+    console.log('  2. Right-click the channel > Copy Channel ID');
+    console.log('');
+
+    const notifyId = await prompt('Enter NOTIFICATION Channel ID: ');
+    if (!notifyId) {
+      console.error('[Error] Channel ID is required');
+      process.exit(1);
+    }
+
+    const credentials = { token, notificationMethod, notifyId };
+    saveCredentials(credentials);
+
+    console.log('');
+    console.log('[Setup] Settings saved to .env');
+    console.log('[Setup] Notifications will be sent to channel');
+
+    return credentials;
+  }
 }
 
 export async function configureRaidDetection(config: Config): Promise<Config> {

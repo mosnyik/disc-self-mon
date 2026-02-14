@@ -1,5 +1,5 @@
-import { Client, GuildMember } from 'discord.js-selfbot-v13';
-import { Config } from '../types';
+import { Client, GuildMember, TextChannel } from 'discord.js-selfbot-v13';
+import { Config, Credentials } from '../types';
 import { raidDetector } from '../services/raid-detector';
 import { getAccountAge } from '../utils/helpers';
 
@@ -26,7 +26,7 @@ export function setupReadyEvent(client: Client, config: Config): void {
 export function setupMemberJoinEvent(
   client: Client,
   getConfig: () => Config,
-  notifyUserId: string
+  credentials: Credentials
 ): void {
   client.on('guildMemberAdd', async (member: GuildMember) => {
     const config = getConfig();
@@ -35,8 +35,6 @@ export function setupMemberJoinEvent(
     if (config.exemptServers.includes(member.guild.id)) return;
 
     try {
-      const recipient = await client.users.fetch(notifyUserId);
-
       // Check for raid
       let isRaid = false;
       let joinCount = 1;
@@ -68,7 +66,19 @@ export function setupMemberJoinEvent(
         content += `Member Count: ${member.guild.memberCount}`;
       }
 
-      await recipient.send(content);
+      // Send notification based on method
+      if (credentials.notificationMethod === 'dm') {
+        const recipient = await client.users.fetch(credentials.notifyId);
+        await recipient.send(content);
+      } else {
+        const channel = await client.channels.fetch(credentials.notifyId) as TextChannel;
+        if (channel && channel.isText()) {
+          await channel.send(content);
+        } else {
+          console.error('[Error] Could not find notification channel or channel is not a text channel');
+          return;
+        }
+      }
 
       // Log join
       const raidIndicator = isRaid ? ' [RAID]' : '';

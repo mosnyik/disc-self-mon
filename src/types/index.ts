@@ -9,9 +9,12 @@ export interface RaidDetectionConfig {
   timeframe: number;
 }
 
+export type NotificationMethod = 'dm' | 'channel';
+
 export interface Credentials {
   token: string;
-  notifyUserId: string;
+  notificationMethod: NotificationMethod;
+  notifyId: string; // User ID for DM, Channel ID for channel
 }
 
 export interface RaidCheckResult {

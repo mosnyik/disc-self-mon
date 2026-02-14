@@ -1,0 +1,8 @@
+{
+  "pkg": {
+    "targets": ["node18-win-x64"],
+    "outputPath": "dist",
+    "scripts": ["dist/bundle.js"],
+    "ignore": ["node:sqlite", "node:*"]
+  }
+}

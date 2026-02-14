@@ -1,12 +1,23 @@
 import { loadConfig, loadCredentials } from './config';
-import { showMainMenu } from './cli/menu';
+import { showMainMenu, printHeader } from './cli/menu';
 import { setupCredentials, configureRaidDetection, configureExemptServers } from './cli/setup';
 import { startBot } from './bot/client';
+import { Credentials } from './types';
 
 async function main(): Promise<void> {
-  // Load config and credentials
+  // Load config (creates default if missing)
   let config = loadConfig();
-  let credentials = loadCredentials() || await setupCredentials();
+
+  // Check for existing credentials
+  let credentials: Credentials | null = loadCredentials();
+
+  // First-time setup
+  if (!credentials) {
+    printHeader('WELCOME TO DISCORD JOIN MONITOR');
+    console.log('No configuration found. Let\'s set up the bot.');
+    console.log('');
+    credentials = await setupCredentials();
+  }
 
   // Main menu loop
   let shouldStart = false;

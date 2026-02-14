@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { config as loadEnv } from 'dotenv';
-import { Config, Credentials } from '../types';
+import { Config, Credentials, NotificationMethod } from '../types';
 import { CONFIG_PATH, ENV_PATH, DEFAULT_CONFIG } from './constants';
 
 export function loadConfig(): Config {
@@ -37,18 +37,26 @@ export function loadCredentials(): Credentials | null {
   }
 
   const token = process.env.MONITOR_TOKEN;
-  const notifyUserId = process.env.NOTIFY_USER_ID;
+  const notificationMethod = process.env.NOTIFICATION_METHOD as NotificationMethod;
+  const notifyId = process.env.NOTIFY_ID;
 
+  // Check if valid
   if (token && token !== 'your_token_here' &&
-      notifyUserId && notifyUserId !== 'your_user_id_here') {
-    return { token, notifyUserId };
+      notificationMethod && (notificationMethod === 'dm' || notificationMethod === 'channel') &&
+      notifyId && notifyId !== 'your_id_here') {
+    return { token, notificationMethod, notifyId };
   }
 
   return null;
 }
 
 export function saveCredentials(credentials: Credentials): void {
-  const envContent = `MONITOR_TOKEN=${credentials.token}\nNOTIFY_USER_ID=${credentials.notifyUserId}\n`;
+  const envContent = [
+    `MONITOR_TOKEN=${credentials.token}`,
+    `NOTIFICATION_METHOD=${credentials.notificationMethod}`,
+    `NOTIFY_ID=${credentials.notifyId}`
+  ].join('\n') + '\n';
+
   fs.writeFileSync(ENV_PATH, envContent, 'utf8');
 }
 

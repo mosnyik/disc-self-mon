@@ -29,7 +29,7 @@ On startup, you'll see:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   1. Start monitoring
-  2. Change Discord token/User ID
+  2. Reconfigure (token, notification method)
   3. Configure raid detection
   4. Configure exempt servers
   5. Exit
@@ -59,13 +59,17 @@ After first run, two files are created next to the exe:
 Contains your credentials (auto-generated during setup):
 ```env
 MONITOR_TOKEN=your_token
-NOTIFY_USER_ID=your_user_id
+NOTIFICATION_METHOD=dm
+NOTIFY_ID=your_user_or_channel_id
 ```
 
 | Variable | Description |
 |----------|-------------|
 | `MONITOR_TOKEN` | Discord token of the account running the selfbot (monitors servers) |
-| `NOTIFY_USER_ID` | Discord User ID that receives DM notifications (can be same or different account) |
+| `NOTIFICATION_METHOD` | Either `dm` or `channel` |
+| `NOTIFY_ID` | User ID (for DM) or Channel ID (for channel notifications) |
+
+> **Important:** If using DM notifications, the `NOTIFY_ID` must be a **different account** than the one used for `MONITOR_TOKEN`. Discord does not allow sending DMs to yourself. Use channel notifications if you only have one account.
 
 ### `config.json`
 Customizable settings:
@@ -103,7 +107,7 @@ Config supports hot-reload - edit while running and changes apply immediately.
 ## Reconfiguring
 
 Just run the exe and select from the menu:
-- **Option 2** - Change monitor account token or notification recipient
+- **Option 2** - Reconfigure (token, notification method, recipient)
 - **Option 3** - Configure raid detection (enable/disable, threshold, timeframe)
 - **Option 4** - Add/remove exempt servers
 
