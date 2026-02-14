@@ -1,115 +1,159 @@
 # Discord Join Monitor
 
-A Discord selfbot that monitors server joins and sends DM notifications with member info. Can be packaged as a standalone Windows executable.
+A Discord selfbot that monitors server joins and sends you DM notifications with raid detection.
 
 ## Features
 
 - Monitor multiple Discord servers for new member joins
-- Receive DM notifications with user info (username, avatar, account age)
-- Server whitelist with hot-reload (edit config while running)
-- Package as standalone Windows exe
+- **Raid Detection** - Alert when multiple users join rapidly
+- DM notifications with user info (username, avatar, account age)
+- Server exemption list with hot-reload
+- **Simple setup** - Just run the exe and follow prompts
+- Standalone Windows executable
 
-## Prerequisites
+## Quick Start
 
-1. **Node.js** (v18 or higher)
-2. **pnpm** package manager
-3. **Discord User Token** - Your personal account token
+1. Download `discord-mon.exe`
+2. Double-click to run
+3. On first run, enter your Discord token and user ID
+4. Select "Start monitoring" from menu
+5. Done - bot is running
+
+## Main Menu
+
+On startup, you'll see:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       DISCORD JOIN MONITOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Start monitoring
+  2. Change Discord token/User ID
+  3. Configure raid detection
+  4. Configure exempt servers
+  5. Exit
+```
+
+All settings can be reconfigured anytime from this menu.
 
 ## Getting Your Discord Token
 
-1. Open Discord in a browser (not the desktop app)
+1. Open Discord in a browser (not desktop app)
 2. Press `F12` to open Developer Tools
 3. Go to the **Network** tab
 4. Type `/api` in the filter box
-5. Perform any action in Discord (send message, switch channels, etc.)
+5. Perform any action in Discord (send message, switch channels)
 6. Click on any request and find the `Authorization` header - this is your token
 
-## Installation
+## Getting Your User ID
 
-```bash
-pnpm install
-```
+1. Enable Developer Mode: Discord Settings > App Settings > Advanced > Developer Mode
+2. Right-click your username > "Copy User ID"
 
 ## Configuration
 
-### Environment Variables (`.env`)
+After first run, two files are created next to the exe:
 
-Copy `.env.example` to `.env` and fill in your credentials:
-
+### `.env`
+Contains your credentials (auto-generated during setup):
 ```env
-BOT_TOKEN=your_discord_token_here
-OWNER_ID=your_discord_user_id
+MONITOR_TOKEN=your_token
+NOTIFY_USER_ID=your_user_id
 ```
 
 | Variable | Description |
 |----------|-------------|
-| `BOT_TOKEN` | Your Discord user token |
-| `OWNER_ID` | Your Discord user ID (notifications sent to yourself) |
+| `MONITOR_TOKEN` | Discord token of the account running the selfbot (monitors servers) |
+| `NOTIFY_USER_ID` | Discord User ID that receives DM notifications (can be same or different account) |
 
-### Server Whitelist (`config.json`)
-
-Edit `config.json` to specify which servers to monitor:
-
+### `config.json`
+Customizable settings:
 ```json
 {
-  "serverWhitelist": [
-    "SERVER_ID_1",
-    "SERVER_ID_2"
-  ]
+  "exemptServers": [
+    "SERVER_ID_TO_IGNORE"
+  ],
+  "raidDetection": {
+    "enabled": true,
+    "threshold": 5,
+    "timeframe": 10
+  }
 }
 ```
 
-This file supports hot-reload - edit while running and changes apply immediately.
+| Option | Description |
+|--------|-------------|
+| `exemptServers` | Server IDs to exclude from monitoring |
+| `raidDetection.enabled` | Enable/disable raid detection |
+| `raidDetection.threshold` | Number of joins to trigger raid alert |
+| `raidDetection.timeframe` | Time window in seconds |
 
-### Getting IDs
+Config supports hot-reload - edit while running and changes apply immediately.
 
-1. Enable Developer Mode in Discord: Settings > App Settings > Advanced > Developer Mode
-2. Right-click a server > "Copy Server ID"
-3. Right-click your username > "Copy User ID"
+## Notifications
 
-## Usage
+### Normal Join
+- Blue embed with username and account age
 
-### Run in development
+### Raid Alert
+- Red "RAID ALERT" embed
+- Server name, joins detected, member count
+
+## Reconfiguring
+
+Just run the exe and select from the menu:
+- **Option 2** - Change monitor account token or notification recipient
+- **Option 3** - Configure raid detection (enable/disable, threshold, timeframe)
+- **Option 4** - Add/remove exempt servers
+
+Or edit the config files directly - changes to `config.json` hot-reload while running.
+
+## Planned Features
+
+The following features are planned for future releases:
+
+### Notification Methods
+- [ ] Discord channel notifications (post to a specific channel)
+- [ ] Discord webhook support (backup/alternative notification)
+- [ ] Telegram integration (with profile picture support)
+
+### Detection & Security
+- [ ] Suspicious account detection (new accounts, no avatar)
+- [ ] Configurable account age threshold for alerts
+- [ ] Welcome channel monitoring (detect welcome embeds)
+
+### Data & Analytics
+- [ ] SQLite database for member history
+- [ ] Analytics tracking (joins per day, suspicious count, raid count)
+- [ ] `!stats` command for runtime statistics
+- [ ] File-based logging system
+
+### Enhanced Notifications
+- [ ] User ID in embed
+- [ ] Account creation date (Discord timestamp)
+- [ ] Suspicious indicators in embed
+- [ ] Guild statistics in notification (7-day summary)
+- [ ] Member count in normal join notifications
+
+### Configuration
+- [ ] Server whitelist mode (monitor only specific servers)
+- [ ] Per-server notification settings
+
+## Building from Source
 
 ```bash
+# Install dependencies
+pnpm install
+
+# Run in development
 pnpm start
-```
 
-Displays all servers your account is in, with checkmarks for monitored ones:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Bot] Logged in as YourUsername#1234
-[Bot] Serving 3 server(s)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Bot] Available servers:
-  ✓ My Server (123456789)
-  ○ Other Server (987654321)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Bot] Waiting for member joins...
-```
-
-### Hot-reload config
-
-Edit `serverWhitelist` in `config.json` while running. Changes apply immediately without restart.
-
-### Build Windows executable
-
-```bash
+# Build Windows executable
 pnpm build
 ```
 
 Output: `dist/discord-mon.exe`
-
-To run the exe, place both `.env` and `config.json` in the same folder as the executable.
-
-## Notification Format
-
-When someone joins a monitored server, you'll receive a DM with:
-
-- Username
-- Profile avatar
-- Account age
 
 ## Disclaimer
 
