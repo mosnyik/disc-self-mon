@@ -1,0 +1,30 @@
+{
+  "name": "discord-mon",
+  "version": "1.0.0",
+  "description": "Discord bot that monitors server joins and sends DM notifications",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build:ts": "tsc",
+    "build": "tsc && pkg dist/index.js --targets node18-win-x64 --output dist/discord-mon.exe"
+  },
+  "pkg": {
+    "assets": [],
+    "outputPath": "dist"
+  },
+  "keywords": ["discord", "bot", "monitor"],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.29.3",
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "pkg": "^5.8.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}
