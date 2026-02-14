@@ -1,4 +1,5 @@
-import { Client, GatewayIntentBits, EmbedBuilder, GuildMember } from 'discord.js';
+// import { Client, GatewayIntentBits, EmbedBuilder, GuildMember } from 'discord.js';
+import { Client, MessageEmbed } from "discord.js-selfbot-v13"; 
 import chokidar from 'chokidar';
 import fs from 'fs';
 import path from 'path';
@@ -73,12 +74,11 @@ watcher.on('change', () => {
   reloadConfig();
 });
 
-// Create Discord client
+
+
+// Use the latest maintained fork settings
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers
-  ]
+  // patchVoice: true    // Necessary if you plan to use voice features in 2026
 });
 
 client.once('ready', () => {
@@ -96,50 +96,35 @@ client.once('ready', () => {
   console.log('[Tip] Edit config.json to add/remove servers (hot-reload enabled)');
 });
 
-client.on('guildMemberAdd', async (member: GuildMember) => {
-  const guild = member.guild;
-
-  // Check if server is in whitelist
-  if (!config.serverWhitelist.includes(guild.id)) {
-    return;
-  }
-
-  console.log(`[Join] ${member.user.tag} joined ${guild.name}`);
+client.on("guildMemberAdd", async (member) => {
+  if (!config.serverWhitelist.includes(member.guild.id)) return;
 
   try {
-    const owner = await client.users.fetch(OWNER_ID);
-
-    // Calculate account age
-    const createdAt = member.user.createdAt;
-    const accountAge = getAccountAge(createdAt);
-
-    const embed = new EmbedBuilder()
-      .setColor(0x5865F2)
-      .setTitle('New Member Joined')
-      .setThumbnail(member.user.displayAvatarURL({ size: 256 }))
+    // In v13, use MessageEmbed instead of EmbedBuilder
+    const embed = new MessageEmbed()
+      .setColor("#5865F2")
+      .setTitle("New Member Detected")
+      .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
       .addFields(
-        { name: 'User', value: `${member.user.tag}`, inline: true },
-        { name: 'User ID', value: member.user.id, inline: true },
-        { name: 'Server', value: guild.name, inline: true },
-        { name: 'Member Count', value: `${guild.memberCount}`, inline: true },
-        { name: 'Account Created', value: `<t:${Math.floor(createdAt.getTime() / 1000)}:R>`, inline: true },
-        { name: 'Account Age', value: accountAge, inline: true }
+        { name: "User", value: member.user.tag, inline: true },
+        {
+          name: "Account Age",
+          value: getAccountAge(member.user.createdAt),
+          inline: true,
+        },
       )
-      .setFooter({ text: `Server ID: ${guild.id}` })
       .setTimestamp();
 
+    // Selfbots send DMs to the OWNER_ID (you) the same way as bots
+    const owner = await client.users.fetch(OWNER_ID!);
     await owner.send({ embeds: [embed] });
-    console.log(`[DM] Notification sent to owner`);
-  } catch (error) {
-    const err = error as { code?: number; message: string };
-    if (err.code === 50007) {
-      console.error('[DM] Cannot send DM to owner - DMs may be disabled');
-    } else {
-      console.error('[Error]', err.message);
-    }
+  } catch (error: any) {
+    console.error(
+      "[Detection Risk] Failed to send notification:",
+      error.message,
+    );
   }
 });
-
 function getAccountAge(createdAt: Date): string {
   const now = new Date();
   const diff = now.getTime() - createdAt.getTime();

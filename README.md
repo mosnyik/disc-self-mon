@@ -1,31 +1,28 @@
 # Discord Join Monitor
 
-A Discord bot that monitors server joins and sends you DM notifications with detailed member info. Can be packaged as a standalone Windows executable.
+A Discord selfbot that monitors server joins and sends DM notifications with member info. Can be packaged as a standalone Windows executable.
 
 ## Features
 
 - Monitor multiple Discord servers for new member joins
-- Receive DM notifications with detailed info (username, avatar, account age, server name, member count)
-- Server whitelist with hot-reload (edit config while bot runs)
+- Receive DM notifications with user info (username, avatar, account age)
+- Server whitelist with hot-reload (edit config while running)
 - Package as standalone Windows exe
 
 ## Prerequisites
 
 1. **Node.js** (v18 or higher)
 2. **pnpm** package manager
-3. **Discord Bot Token** - Create at https://discord.com/developers/applications
+3. **Discord User Token** - Your personal account token
 
-## Discord Bot Setup
+## Getting Your Discord Token
 
-1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
-2. Click "New Application" and give it a name
-3. Go to "Bot" section and click "Add Bot"
-4. Copy the bot token
-5. **Enable "Server Members Intent"** under Privileged Gateway Intents (required!)
-6. Go to "OAuth2" > "URL Generator"
-   - Select `bot` scope
-   - Select `Send Messages` permission
-7. Use the generated URL to invite the bot to your servers
+1. Open Discord in a browser (not the desktop app)
+2. Press `F12` to open Developer Tools
+3. Go to the **Network** tab
+4. Type `/api` in the filter box
+5. Perform any action in Discord (send message, switch channels, etc.)
+6. Click on any request and find the `Authorization` header - this is your token
 
 ## Installation
 
@@ -40,14 +37,14 @@ pnpm install
 Copy `.env.example` to `.env` and fill in your credentials:
 
 ```env
-BOT_TOKEN=your_bot_token_here
+BOT_TOKEN=your_discord_token_here
 OWNER_ID=your_discord_user_id
 ```
 
 | Variable | Description |
 |----------|-------------|
-| `BOT_TOKEN` | Your Discord bot token |
-| `OWNER_ID` | Your Discord user ID (to receive DMs) |
+| `BOT_TOKEN` | Your Discord user token |
+| `OWNER_ID` | Your Discord user ID (notifications sent to yourself) |
 
 ### Server Whitelist (`config.json`)
 
@@ -62,7 +59,7 @@ Edit `config.json` to specify which servers to monitor:
 }
 ```
 
-This file supports hot-reload - edit while the bot is running and changes apply immediately.
+This file supports hot-reload - edit while running and changes apply immediately.
 
 ### Getting IDs
 
@@ -78,11 +75,11 @@ This file supports hot-reload - edit while the bot is running and changes apply 
 pnpm start
 ```
 
-The bot will display all servers it's in, with checkmarks for monitored ones:
+Displays all servers your account is in, with checkmarks for monitored ones:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Bot] Logged in as MonitorBot#1234
+[Bot] Logged in as YourUsername#1234
 [Bot] Serving 3 server(s)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [Bot] Available servers:
@@ -94,7 +91,7 @@ The bot will display all servers it's in, with checkmarks for monitored ones:
 
 ### Hot-reload config
 
-Edit `serverWhitelist` in `config.json` while the bot is running. Changes apply immediately without restart.
+Edit `serverWhitelist` in `config.json` while running. Changes apply immediately without restart.
 
 ### Build Windows executable
 
@@ -110,10 +107,13 @@ To run the exe, place both `.env` and `config.json` in the same folder as the ex
 
 When someone joins a monitored server, you'll receive a DM with:
 
-- Username and user ID
+- Username
 - Profile avatar
-- Server name and current member count
-- Account creation date and age
+- Account age
+
+## Disclaimer
+
+Selfbots are against Discord's Terms of Service. Use at your own risk. Your account may be banned.
 
 ## License
 
